@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convert JPG to PDF - Multi-Tools</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h1 class="h4 mb-0">Convert JPG to PDF</h1>
+                    </div>
+                    <div class="card-body">
+                        <!-- File Upload Section -->
+                        <div class="upload-section mb-4">
+                            <div class="text-center mb-4">
+                                <i class="fas fa-images fa-3x text-primary mb-3"></i>
+                                <h2 class="h5">Select Image Files</h2>
+                                <p class="text-muted">Choose one or more JPG/JPEG images to convert to PDF</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <input type="file" class="form-control" id="imageFiles" accept=".jpg,.jpeg" multiple>
+                                <div class="form-text">Maximum file size: 10MB per image</div>
+                            </div>
+
+                            <!-- Page Settings -->
+                            <div class="mb-3">
+                                <label for="pageSize" class="form-label">Page Size</label>
+                                <select class="form-select" id="pageSize">
+                                    <option value="a4" selected>A4 (210 × 297 mm)</option>
+                                    <option value="letter">Letter (216 × 279 mm)</option>
+                                    <option value="legal">Legal (216 × 356 mm)</option>
+                                    <option value="fit">Fit to Image</option>
+                                </select>
+                            </div>
+
+                            <!-- Orientation -->
+                            <div class="mb-3">
+                                <label for="orientation" class="form-label">Page Orientation</label>
+                                <select class="form-select" id="orientation">
+                                    <option value="auto" selected>Auto (Based on Image)</option>
+                                    <option value="portrait">Portrait</option>
+                                    <option value="landscape">Landscape</option>
+                                </select>
+                            </div>
+
+                            <!-- Selected Files List -->
+                            <div id="selectedFiles" class="list-group mb-3">
+                                <!-- Files will be listed here -->
+                            </div>
+
+                            <!-- File Info -->
+                            <div id="fileInfo" class="alert alert-info d-none">
+                                <h6 class="mb-2">Selected Files:</h6>
+                                <p class="mb-1">Count: <span id="fileCount">0</span></p>
+                                <p class="mb-0">Total Size: <span id="totalSize">0 B</span></p>
+                            </div>
+
+                            <!-- Error Container -->
+                            <div id="error-container" class="mb-3"></div>
+
+                            <!-- Success Container -->
+                            <div id="success-container" class="mb-3"></div>
+
+                            <!-- Loading Indicator -->
+                            <div id="loading-indicator" class="text-center d-none">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Converting your images...</p>
+                                <p class="text-muted small">This may take a few moments</p>
+                            </div>
+
+                            <!-- Convert Button -->
+                            <button id="convertButton" class="btn btn-primary w-100" disabled>
+                                <i class="fas fa-file-pdf me-2"></i>Convert to PDF
+                            </button>
+                        </div>
+
+                        <!-- Instructions -->
+                        <div class="instructions mt-4">
+                            <h3 class="h5">How to Convert JPG to PDF:</h3>
+                            <ol class="text-muted">
+                                <li>Click to select or drag and drop one or more JPG/JPEG images</li>
+                                <li>Choose your preferred page size and orientation</li>
+                                <li>Arrange images in the desired order (drag to reorder)</li>
+                                <li>Click the "Convert to PDF" button</li>
+                                <li>Download your converted PDF file</li>
+                            </ol>
+
+                            <div class="alert alert-info mt-3">
+                                <h4 class="h6"><i class="fas fa-info-circle me-2"></i>Important Notes:</h4>
+                                <ul class="mb-0 small">
+                                    <li>Supported formats: JPG/JPEG</li>
+                                    <li>Each image will become a separate page in the PDF</li>
+                                    <li>Images are automatically resized to fit the selected page size</li>
+                                    <li>Original image quality is preserved</li>
+                                    <li>Maximum file size: 10MB per image</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ad Section -->
+                <div class="ad-section text-center my-4">
+                    <div class="ad-banner">
+                        Advertisement Space
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('imageFiles');
+            const convertButton = document.getElementById('convertButton');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const fileInfo = document.getElementById('fileInfo');
+            const selectedFiles = document.getElementById('selectedFiles');
+            const fileCount = document.getElementById('fileCount');
+            const totalSize = document.getElementById('totalSize');
+            const API_BASE_URL = 'http://localhost:8080';
+
+            // Initialize drag and drop sorting
+            new Sortable(selectedFiles, {
+                animation: 150,
+                ghostClass: 'sortable-ghost'
+            });
+
+            // Format file size
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            // Update selected files list
+            function updateSelectedFiles(files) {
+                selectedFiles.innerHTML = '';
+                let totalBytes = 0;
+
+                Array.from(files).forEach((file, index) => {
+                    totalBytes += file.size;
+                    const item = document.createElement('div');
+                    item.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    item.dataset.index = index;
+                    item.innerHTML = `
+                        <div>
+                            <i class="fas fa-image me-2"></i>
+                            ${file.name}
+                            <small class="text-muted ms-2">(${formatFileSize(file.size)})</small>
+                        </div>
+                        <button class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    selectedFiles.appendChild(item);
+                });
+
+                fileCount.textContent = files.length;
+                totalSize.textContent = formatFileSize(totalBytes);
+                fileInfo.classList.toggle('d-none', files.length === 0);
+                convertButton.disabled = files.length === 0;
+            }
+
+            // Handle file selection
+            fileInput.addEventListener('change', function() {
+                const { files, errors } = handleFileUpload(this, ['image/jpeg', 'image/jpg']);
+                
+                if (errors.length > 0) {
+                    showError(errors.join('<br>'));
+                    return;
+                }
+
+                updateSelectedFiles(files);
+                showError('');
+            });
+
+            // Handle conversion
+            convertButton.addEventListener('click', async function() {
+                try {
+                    const files = Array.from(selectedFiles.children).map(item => 
+                        fileInput.files[parseInt(item.dataset.index)]
+                    );
+
+                    if (files.length === 0) {
+                        showError('Please select at least one image.');
+                        return;
+                    }
+
+                    // Show loading indicator
+                    loadingIndicator.classList.remove('d-none');
+                    convertButton.disabled = true;
+                    // Clear any previous messages
+                    showError('');
+                    showSuccess('');
+
+                    // Create form data
+                    const formData = new FormData();
+                    files.forEach((file, index) => {
+                        formData.append('files', file);
+                    });
+                    formData.append('page_size', document.getElementById('pageSize').value);
+                    formData.append('orientation', document.getElementById('orientation').value);
+
+                    // Send request to server
+                    const response = await fetch(`${API_BASE_URL}/convert-jpg-to-pdf`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const data = await response.json();
+                        throw new Error(data.error || data.details || 'Conversion failed');
+                    }
+
+                    // Get the blob
+                    const blob = await response.blob();
+                    
+                    // Create download link
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'converted.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    showSuccess('Images successfully converted to PDF! Downloading...');
+                } catch (error) {
+                    showError('Error converting file: ' + error.message);
+                } finally {
+                    loadingIndicator.classList.add('d-none');
+                    convertButton.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
