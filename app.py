@@ -1,6 +1,7 @@
 from flask import Flask, render_template, send_from_directory, abort, request, jsonify, send_file, session
 import os
 import logging
+import datetime
 from werkzeug.utils import secure_filename
 from pdf2docx import Converter
 import tempfile
@@ -23,25 +24,23 @@ import jwt
 from functools import wraps
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
+from pdf2image import convert_from_path
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Get the absolute path of the current directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-app = Flask(__name__, static_url_path='')
+app = Flask(__name__, static_url_path='', static_folder='.')
 app.secret_key = os.urandom(24)  # Generate a secure secret key
 JWT_SECRET_KEY = os.urandom(24)  # Generate a secure JWT secret key
 
 # Configure upload folder
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_DIR)
+    os.makedirs(UPLOAD_FOLDER)
 
 # Define page sizes
 PAGE_SIZES = {
@@ -49,6 +48,14 @@ PAGE_SIZES = {
     'letter': LETTER,
     'legal': LEGAL
 }
+
+# Set poppler path - update this path according to your installation
+POPPLER_PATH = r'C:\Program Files\poppler\Library\bin'
+if os.path.exists(POPPLER_PATH):
+    os.environ['PATH'] = POPPLER_PATH + os.pathsep + os.environ['PATH']
+    logger.info(f'Poppler path added to PATH: {POPPLER_PATH}')
+else:
+    logger.warning('Poppler path not found. PDF to image conversion may not work.')
 
 # Database initialization
 def init_db():
@@ -121,35 +128,39 @@ def get_user_by_email(email):
 # Authentication routes
 @app.route('/api/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    
-    # Validate required fields
-    required_fields = ['firstName', 'lastName', 'email', 'password']
-    for field in required_fields:
-        if not data.get(field):
-            return jsonify({'message': f'{field} is required'}), 400
-    
-    # Check if email already exists
-    if get_user_by_email(data['email']):
-        return jsonify({'message': 'Email already registered'}), 400
-    
-    # Hash password
-    hashed_password = generate_password_hash(data['password'])
-    
-    # Insert new user
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
     try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['first_name', 'last_name', 'email', 'password']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'error': f'{field} is required'}), 400
+        
+        # Check if user already exists
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('SELECT * FROM users WHERE email = ?', (data['email'],))
+        if c.fetchone():
+            conn.close()
+            return jsonify({'error': 'Email already registered'}), 400
+        
+        # Hash password
+        hashed_password = generate_password_hash(data['password'])
+        
+        # Insert new user
         c.execute('''
             INSERT INTO users (first_name, last_name, email, password)
             VALUES (?, ?, ?, ?)
-        ''', (data['firstName'], data['lastName'], data['email'], hashed_password))
+        ''', (data['first_name'], data['last_name'], data['email'], hashed_password))
         conn.commit()
-        return jsonify({'message': 'Registration successful'}), 201
-    except Exception as e:
-        return jsonify({'message': 'Registration failed'}), 500
-    finally:
         conn.close()
+        
+        return jsonify({'message': 'Registration successful'}), 201
+        
+    except Exception as e:
+        logger.error(f'Registration error: {e}')
+        return jsonify({'error': 'Registration failed'}), 500
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -271,6 +282,15 @@ def index():
         logger.error(f'Error serving index.html: {e}')
         abort(500)
 
+@app.route('/register.html')
+def register_page():
+    try:
+        logger.info('Serving register.html')
+        return send_from_directory(BASE_DIR, 'register.html')
+    except Exception as e:
+        logger.error(f'Error serving register.html: {e}')
+        abort(500)
+
 @app.route('/convert-jpg-to-pdf', methods=['POST'])
 def convert_jpg_to_pdf():
     try:
@@ -384,103 +404,54 @@ def convert_jpg_to_pdf():
 @app.route('/convert-pdf-to-jpeg', methods=['POST'])
 def convert_pdf_to_jpeg():
     try:
-        logger.info('Starting PDF to JPEG conversion')
-        
         if 'file' not in request.files:
-            logger.error('No file part in the request')
             return jsonify({'error': 'No file provided'}), 400
         
         file = request.files['file']
-        if file.filename == '':
-            logger.error('No selected file')
-            return jsonify({'error': 'No file selected'}), 400
-        
-        if not file.filename.lower().endswith('.pdf'):
-            logger.error(f'Invalid file type: {file.filename}')
-            return jsonify({'error': 'Only PDF files are allowed'}), 400
+        if file.filename == '' or not file.filename.lower().endswith('.pdf'):
+            return jsonify({'error': 'Invalid file format. Please upload a PDF file.'}), 400
 
-        # Get quality setting
-        quality = int(request.form.get('quality', '300'))
-        start_page = int(request.form.get('start_page', '1'))
+        # Get conversion settings
+        quality = int(request.form.get('quality', 300))
+        start_page = int(request.form.get('start_page', 1))
         end_page = request.form.get('end_page')
+        if end_page:
+            end_page = int(end_page)
 
-        logger.info(f'Processing file: {file.filename} with quality: {quality} DPI')
+        # Create a temporary directory for processing
+        with tempfile.TemporaryDirectory() as temp_dir:
+            pdf_path = os.path.join(temp_dir, secure_filename(file.filename))
+            file.save(pdf_path)
 
-        # Create temporary files
-        with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as pdf_temp:
-            logger.info(f'Created temporary PDF file: {pdf_temp.name}')
-            file.save(pdf_temp.name)
-            
-            # Create a temporary ZIP file
-            zip_temp = tempfile.NamedTemporaryFile(suffix='.zip', delete=False)
-            zip_temp.close()
-            logger.info(f'Created temporary ZIP file: {zip_temp.name}')
-
+            # Convert PDF to images using pdf2image
             try:
-                # Open the PDF
-                pdf_document = fitz.open(pdf_temp.name)
-                total_pages = pdf_document.page_count
-                
-                # Validate page range
-                if end_page is None or end_page == '':
-                    end_page = total_pages
-                else:
-                    end_page = int(end_page)
-                
-                start_page = max(1, min(start_page, total_pages))
-                end_page = max(start_page, min(end_page, total_pages))
-                
-                logger.info(f'Converting pages {start_page} to {end_page} of {total_pages}')
-
-                # Create ZIP file
-                with zipfile.ZipFile(zip_temp.name, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                    # Convert each page
-                    for page_num in range(start_page - 1, end_page):
-                        page = pdf_document[page_num]
-                        pix = page.get_pixmap(dpi=quality)
-                        
-                        # Convert to PIL Image
-                        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-                        
-                        # Save to bytes
-                        img_byte_arr = io.BytesIO()
-                        img.save(img_byte_arr, format='JPEG', quality=95)
-                        img_byte_arr.seek(0)
-                        
-                        # Add to ZIP
-                        zipf.writestr(f'page_{page_num + 1}.jpg', img_byte_arr.getvalue())
-                        logger.info(f'Converted page {page_num + 1}')
-
-                pdf_document.close()
-                logger.info('PDF to JPEG conversion completed successfully')
-
-                # Send the ZIP file
-                return send_file(
-                    zip_temp.name,
-                    as_attachment=True,
-                    download_name=file.filename.replace('.pdf', '_images.zip'),
-                    mimetype='application/zip'
+                images = convert_from_path(
+                    pdf_path,
+                    dpi=quality,
+                    first_page=start_page,
+                    last_page=end_page
                 )
+            except Exception as e:
+                return jsonify({'error': f'PDF conversion failed: {str(e)}'}), 500
 
-            except Exception as conv_error:
-                logger.error(f'Error during conversion: {str(conv_error)}')
-                raise
-            finally:
-                # Clean up temporary files
-                logger.info('Cleaning up temporary files')
-                try:
-                    os.unlink(pdf_temp.name)
-                    os.unlink(zip_temp.name)
-                except Exception as cleanup_error:
-                    logger.error(f'Error cleaning up temporary files: {str(cleanup_error)}')
+            # Create a ZIP file containing all converted images
+            zip_path = os.path.join(temp_dir, 'converted_images.zip')
+            with zipfile.ZipFile(zip_path, 'w') as zip_file:
+                for i, image in enumerate(images, start=start_page):
+                    image_path = os.path.join(temp_dir, f'page_{i}.jpg')
+                    image.save(image_path, 'JPEG', quality=95)
+                    zip_file.write(image_path, f'page_{i}.jpg')
+
+            return send_file(
+                zip_path,
+                mimetype='application/zip',
+                as_attachment=True,
+                download_name=f"{os.path.splitext(file.filename)[0]}_images.zip"
+            )
 
     except Exception as e:
-        error_msg = str(e)
-        logger.error(f'Error converting PDF to JPEG: {error_msg}')
-        return jsonify({
-            'error': 'Failed to convert PDF to JPEG',
-            'details': error_msg
-        }), 500
+        app.logger.error(f"Error in PDF to JPEG conversion: {str(e)}")
+        return jsonify({'error': 'An error occurred during conversion'}), 500
 
 @app.route('/convert-pdf-to-word', methods=['POST'])
 def convert_pdf_to_word():

@@ -3,577 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Tools Hub - Professional PDF Solutions</title>
+    <title>PDF Tools Hub - Your All-in-One PDF Solution</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --accent-color: #3b82f6;
-            --background-color: #f8fafc;
-            --card-background: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #475569;
-            --border-color: rgba(0, 0, 0, 0.08);
-            --shadow-color: rgba(0, 0, 0, 0.1);
+            --secondary-color: #4f46e5;
+            --accent-color: #06b6d4;
+            --background-light: #ffffff;
+            --text-light: #1f2937;
+            --border-light: #e5e7eb;
         }
 
         [data-bs-theme="dark"] {
             --primary-color: #3b82f6;
-            --secondary-color: #2563eb;
-            --accent-color: #60a5fa;
-            --background-color: #0f172a;
-            --card-background: #1e293b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --shadow-color: rgba(0, 0, 0, 0.3);
+            --secondary-color: #6366f1;
+            --accent-color: #22d3ee;
+            --background-light: #1f2937;
+            --text-light: #f3f4f6;
+            --border-light: #374151;
         }
 
         body {
-            background-color: var(--background-color);
-            color: var(--text-primary);
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            background-color: var(--background-light);
+            color: var(--text-light);
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .hero-section {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
             padding: 4rem 0;
-            margin-bottom: 3rem;
-            box-shadow: 0 4px 6px -1px var(--shadow-color);
-            position: relative;
+            color: white;
         }
 
         .theme-toggle {
             position: fixed;
-            top: 1rem;
-            right: 1rem;
+            top: 20px;
+            right: 20px;
             z-index: 1000;
-            background: var(--card-background);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 0.5rem 1rem;
-            border-radius: 50px;
+            border-radius: 2rem;
             cursor: pointer;
-            box-shadow: 0 2px 4px var(--shadow-color);
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            color: white;
         }
 
         .theme-toggle:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px var(--shadow-color);
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        .theme-toggle i {
-            font-size: 1.2rem;
-        }
-
-        .hero-title {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-
-        .hero-subtitle {
-            font-size: 1.25rem;
-            opacity: 0.9;
-        }
-
-        .section-title {
-            color: var(--primary-color);
-            font-weight: 600;
-            position: relative;
-            padding-bottom: 0.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            width: 60px;
-            height: 4px;
-            background-color: var(--accent-color);
-            border-radius: 2px;
+        [data-bs-theme="dark"] .theme-toggle {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text-light);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         .tool-card {
-            background: var(--card-background);
-            border-radius: 12px;
-            padding: 2rem;
+            background: var(--background-light);
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
             transition: all 0.3s ease;
-            border: 1px solid var(--border-color);
-            height: 100%;
-            box-shadow: 0 1px 3px var(--shadow-color);
         }
 
         .tool-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 16px var(--shadow-color);
-            border-color: var(--accent-color);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
-        .tool-icon {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .tool-card:hover .tool-icon {
-            transform: scale(1.1);
-            color: var(--accent-color);
-        }
-
-        .tool-card h3 {
-            color: var(--text-primary);
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .tool-card p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            padding: 0.5rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        .category-section {
-            margin-bottom: 4rem;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.6s ease forwards;
-        }
-
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .category-section:nth-child(2) { animation-delay: 0.2s; }
-        .category-section:nth-child(3) { animation-delay: 0.4s; }
-        .category-section:nth-child(4) { animation-delay: 0.6s; }
-
-        .features-section {
-            background-color: var(--card-background);
-            padding: 4rem 0;
-            margin: 3rem 0;
-            border-top: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .feature-item {
-            text-align: center;
-            padding: 1.5rem;
-        }
-
-        .feature-icon {
-            font-size: 2rem;
-            color: var(--accent-color);
-            margin-bottom: 1rem;
-        }
-
-        .feature-item h4 {
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .feature-item p {
-            color: var(--text-secondary);
-        }
-
-        /* Search Results Styles */
-        .search-results {
+        .auth-section {
             position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--card-background);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: 0 4px 6px var(--shadow-color);
+            top: 20px;
+            right: 100px;
             z-index: 1000;
-            max-height: 400px;
-            overflow-y: auto;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .auth-section .btn-outline-light {
+            border-color: rgba(255, 255, 255, 0.5);
+            color: white;
+        }
+
+        .auth-section .btn-outline-light:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .auth-section .btn-light {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-color: transparent;
+        }
+
+        .login-form {
+            position: absolute;
+            top: 70px;
+            right: 100px;
+            width: 300px;
+            background: var(--background-light);
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-top: 1rem;
+            display: none;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+        }
+
+        .login-form.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-profile {
             display: none;
         }
 
-        .search-results.active {
+        .user-profile.show {
             display: block;
-        }
-
-        .search-results .list-group-item {
-            border: none;
-            border-bottom: 1px solid var(--border-color);
-            padding: 0.75rem 1rem;
-        }
-
-        .search-results .list-group-item:last-child {
-            border-bottom: none;
-        }
-
-        .search-results .list-group-item:hover {
-            background-color: var(--background-color);
-        }
-
-        /* Tool Categories */
-        .tool-category {
-            margin-bottom: 3rem;
-            padding: 2rem;
-            background: var(--card-background);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 2px 4px var(--shadow-color);
-        }
-
-        .tool-category h2 {
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--accent-color);
-        }
-
-        /* Sidebar Ad */
-        .sidebar-ad {
-            position: sticky;
-            top: 2rem;
-            background: var(--card-background);
-            border-radius: 12px;
-            padding: 1rem;
-            border: 1px solid var(--border-color);
-            margin-bottom: 2rem;
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .search-results {
-                position: static;
-                margin-top: 0.5rem;
-            }
-
-            .tool-category {
-                padding: 1rem;
-            }
-
-            .sidebar-ad {
-                position: static;
-                margin: 2rem 0;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- Theme Toggle Button -->
-    <button class="theme-toggle" onclick="toggleTheme()">
-        <i class="bi bi-sun-fill" id="theme-icon"></i>
-        <span id="theme-text">Light Mode</span>
+    <!-- Include Navigation -->
+    <div id="navbar-container"></div>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle btn">
+        <i class="fas fa-sun"></i>
+        <span class="ms-2">Light Mode</span>
     </button>
 
-    <!-- Header -->
-    <div id="header"></div>
+    <!-- Authentication Section -->
+    <div class="auth-section">
+        <div id="auth-buttons">
+            <button class="btn btn-outline-light me-2" onclick="showLoginForm()">Login</button>
+            <button class="btn btn-light" onclick="window.location.href='register.html'">Register</button>
+        </div>
+        <div id="user-profile" class="user-profile">
+            <span class="me-2">Welcome, <span id="user-name"></span></span>
+            <button class="btn btn-outline-light btn-sm" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form" class="login-form position-absolute">
+        <h4 class="mb-4">Login</h4>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" required>
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="rememberMe">
+                <label class="form-check-label" for="rememberMe">Remember me</label>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+            <div class="text-center mt-3">
+                <a href="#" class="text-muted">Forgot password?</a>
+            </div>
+        </form>
+    </div>
 
     <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container text-center">
-            <h1 class="hero-title animate__animated animate__fadeInDown">Professional PDF Tools</h1>
-            <p class="hero-subtitle animate__animated animate__fadeInUp">All-in-one solution for your PDF needs</p>
-            
-            <!-- Search Bar -->
-            <div class="row justify-content-center mt-4">
-                <div class="col-md-6">
-                    <div class="search-container position-relative">
-                        <input type="search" class="form-control form-control-lg" id="searchTools" 
-                               placeholder="Search for PDF tools...">
-                        <div id="searchResults" class="search-results"></div>
-                    </div>
+    <section class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-4 mb-4 animate__animated animate__fadeIn">PDF Tools Hub</h1>
+            <p class="lead mb-4 animate__animated animate__fadeIn animate__delay-1s">
+                Professional PDF tools for all your document needs
+            </p>
+            <div class="search-box mb-4 animate__animated animate__fadeIn animate__delay-2s">
+                <input type="text" class="form-control form-control-lg" placeholder="Search tools...">
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools Section -->
+    <section class="container py-5">
+        <h2 class="text-center mb-5">Our Tools</h2>
+        
+        <!-- Conversion Tools -->
+        <div class="row g-4 mb-5">
+            <h3 class="mb-4">Convert Files</h3>
+            <div class="col-md-4">
+                <div class="tool-card">
+                    <i class="fas fa-file-pdf fa-2x mb-3 text-primary"></i>
+                    <h4>JPG to PDF</h4>
+                    <p>Convert your images to PDF format with custom settings</p>
+                    <button class="btn btn-primary w-100" onclick="window.location.href='tools/jpg-to-pdf.html'">Convert Now</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="tool-card">
+                    <i class="fas fa-image fa-2x mb-3 text-primary"></i>
+                    <h4>PDF to JPEG</h4>
+                    <p>Extract images from your PDF files</p>
+                    <button class="btn btn-primary w-100" onclick="window.location.href='tools/pdf-to-jpg.html'">Convert Now</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="tool-card">
+                    <i class="fas fa-file-word fa-2x mb-3 text-primary"></i>
+                    <h4>PDF to Word</h4>
+                    <p>Convert PDF to editable Word documents</p>
+                    <button class="btn btn-primary w-100" onclick="window.location.href='tools/pdf-to-word.html'">Convert Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Editing Tools -->
+        <div class="row g-4">
+            <h3 class="mb-4">Edit PDF</h3>
+            <div class="col-md-4">
+                <div class="tool-card">
+                    <i class="fas fa-stamp fa-2x mb-3 text-primary"></i>
+                    <h4>Add Watermark</h4>
+                    <p>Add text or image watermarks to your PDF</p>
+                    <button class="btn btn-primary w-100" onclick="window.location.href='tools/add-watermark.html'">Start Now</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="tool-card">
+                    <i class="fas fa-redo fa-2x mb-3 text-primary"></i>
+                    <h4>Rotate PDF</h4>
+                    <p>Rotate PDF pages to any angle</p>
+                    <button class="btn btn-primary w-100" onclick="window.location.href='tools/rotate-pdf.html'">Start Now</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="tool-card">
+                    <i class="fas fa-list-ol fa-2x mb-3 text-primary"></i>
+                    <h4>Add Page Numbers</h4>
+                    <p>Add custom page numbers to your PDF</p>
+                    <button class="btn btn-primary w-100" onclick="window.location.href='tools/add-page-numbers.html'">Start Now</button>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Main Content -->
-    <main class="container">
-        <!-- Features Section -->
-        <section class="features-section">
-            <div class="container">
-                <div class="row g-4">
-                    <div class="col-md-4">
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <i class="bi bi-shield-check"></i>
-                            </div>
-                            <h4>Secure Processing</h4>
-                            <p>Your files are processed securely and deleted after conversion</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <i class="bi bi-lightning-charge"></i>
-                            </div>
-                            <h4>Fast Conversion</h4>
-                            <p>Quick and efficient processing of your documents</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <i class="bi bi-hand-thumbs-up"></i>
-                            </div>
-                            <h4>Easy to Use</h4>
-                            <p>Simple and intuitive interface for all your PDF needs</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <div class="row">
-            <!-- Main Content Area -->
-            <div class="col-lg-8">
-                <!-- PDF Creation Tools -->
-                <section class="tool-category">
-                    <h2>Create PDF</h2>
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="tool-card">
-                                <div class="tool-icon">
-                                    <i class="bi bi-file-earmark-image"></i>
-                                </div>
-                                <h3>JPG to PDF</h3>
-                                <p>Convert JPG images to PDF with customizable page size and orientation.</p>
-                                <a href="tools/jpg-to-pdf.html" class="btn btn-primary w-100">Convert Now</a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="tool-card">
-                                <div class="tool-icon">
-                                    <i class="bi bi-file-earmark-word"></i>
-                                </div>
-                                <h3>Word to PDF</h3>
-                                <p>Convert Word documents to PDF while preserving formatting.</p>
-                                <a href="tools/word-to-pdf.html" class="btn btn-primary w-100">Convert Now</a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="tool-card">
-                                <div class="tool-icon">
-                                    <i class="bi bi-file-earmark-code"></i>
-                                </div>
-                                <h3>HTML to PDF</h3>
-                                <p>Convert HTML files or web pages to PDF with styles and images.</p>
-                                <a href="tools/html-to-pdf.html" class="btn btn-primary w-100">Convert Now</a>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- PDF Conversion Tools -->
-                <section class="tool-category">
-                    <h2>Convert PDF</h2>
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="tool-card">
-                                <div class="tool-icon">
-                                    <i class="bi bi-file-earmark-image"></i>
-                                </div>
-                                <h3>PDF to JPG</h3>
-                                <p>Convert PDF pages to JPG images with quality control.</p>
-                                <a href="tools/pdf-to-jpg.html" class="btn btn-primary w-100">Convert Now</a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="tool-card">
-                                <div class="tool-icon">
-                                    <i class="bi bi-file-earmark-word"></i>
-                                </div>
-                                <h3>PDF to Word</h3>
-                                <p>Convert PDF documents to editable Word format.</p>
-                                <a href="tools/pdf-to-word.html" class="btn btn-primary w-100">Convert Now</a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="tool-card">
-                                <div class="tool-icon">
-                                    <i class="bi bi-file-earmark-excel"></i>
-                                </div>
-                                <h3>PDF to Excel</h3>
-                                <p>Convert PDF tables to Excel spreadsheets.</p>
-                                <a href="tools/pdf-to-excel.html" class="btn btn-primary w-100">Convert Now</a>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- PDF Editing Tools -->
-                <section class="tool-category">
-                    <h2>Edit PDF</h2>
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="tool-card">
-                                <div class="tool-icon">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </div>
-                                <h3>Rotate PDF</h3>
-                                <p>Rotate PDF pages by 90°, 180°, or 270° degrees.</p>
-                                <a href="tools/rotate-pdf.html" class="btn btn-primary w-100">Rotate Now</a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="tool-card">
-                                <div class="tool-icon">
-                                    <i class="bi bi-hash"></i>
-                                </div>
-                                <h3>Add Page Numbers</h3>
-                                <p>Add page numbers to PDF with various styles and positions.</p>
-                                <a href="tools/add-page-numbers.html" class="btn btn-primary w-100">Add Numbers</a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="tool-card">
-                                <div class="tool-icon">
-                                    <i class="bi bi-water"></i>
-                                </div>
-                                <h3>Add Watermark</h3>
-                                <p>Add text or image watermarks to PDF documents.</p>
-                                <a href="tools/add-watermark.html" class="btn btn-primary w-100">Add Watermark</a>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Office to PDF Tools -->
-                <section class="tool-category">
-                    <h2>Office to PDF</h2>
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="tool-card">
-                                <div class="tool-icon">
-                                    <i class="bi bi-file-earmark-ppt"></i>
-                                </div>
-                                <h3>PowerPoint to PDF</h3>
-                                <p>Convert PowerPoint presentations to PDF format.</p>
-                                <a href="tools/powerpoint-to-pdf.html" class="btn btn-primary w-100">Convert Now</a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="tool-card">
-                                <div class="tool-icon">
-                                    <i class="bi bi-file-earmark-excel"></i>
-                                </div>
-                                <h3>Excel to PDF</h3>
-                                <p>Convert Excel spreadsheets to PDF with formatting.</p>
-                                <a href="tools/excel-to-pdf.html" class="btn btn-primary w-100">Convert Now</a>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-
-            <!-- Sidebar -->
-            <div class="col-lg-4">
-                <!-- Sidebar Ad -->
-                <div class="sidebar-ad">
-                    <div class="ad-space">
-                        <!-- AdSense Code Here -->
-                        <ins class="adsbygoogle"
-                             style="display:block"
-                             data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-                             data-ad-slot="XXXXXXXXXX"
-                             data-ad-format="vertical"></ins>
-                    </div>
-                </div>
-
-                <!-- Popular Tools -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Popular Tools</h5>
-                    </div>
-                    <div class="list-group list-group-flush">
-                        <a href="tools/pdf-to-word.html" class="list-group-item list-group-item-action">
-                            <i class="bi bi-file-earmark-word me-2"></i>PDF to Word
-                        </a>
-                        <a href="tools/word-to-pdf.html" class="list-group-item list-group-item-action">
-                            <i class="bi bi-file-earmark-word me-2"></i>Word to PDF
-                        </a>
-                        <a href="tools/pdf-to-jpg.html" class="list-group-item list-group-item-action">
-                            <i class="bi bi-file-earmark-image me-2"></i>PDF to JPG
-                        </a>
-                        <a href="tools/jpg-to-pdf.html" class="list-group-item list-group-item-action">
-                            <i class="bi bi-file-earmark-image me-2"></i>JPG to PDF
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <div id="footer"></div>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Theme toggle functionality
-        function toggleTheme() {
-            const html = document.documentElement;
-            const themeIcon = document.getElementById('theme-icon');
-            const themeText = document.getElementById('theme-text');
-            const currentTheme = html.getAttribute('data-bs-theme');
+        // Load navigation and login form components
+        fetch('/components/navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+            });
+
+        fetch('/components/login-form.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('login-form-container').innerHTML = html;
+            });
+
+        // Theme Toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        const html = document.documentElement;
+        const icon = themeToggle.querySelector('i');
+        const text = themeToggle.querySelector('span');
+
+        function setTheme(theme) {
+            html.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('theme', theme);
             
-            if (currentTheme === 'light') {
-                html.setAttribute('data-bs-theme', 'dark');
-                themeIcon.classList.replace('bi-sun-fill', 'bi-moon-fill');
-                themeText.textContent = 'Dark Mode';
-                localStorage.setItem('theme', 'dark');
+            if (theme === 'dark') {
+                icon.className = 'fas fa-moon';
+                text.textContent = 'Dark Mode';
             } else {
-                html.setAttribute('data-bs-theme', 'light');
-                themeIcon.classList.replace('bi-moon-fill', 'bi-sun-fill');
-                themeText.textContent = 'Light Mode';
-                localStorage.setItem('theme', 'light');
+                icon.className = 'fas fa-sun';
+                text.textContent = 'Light Mode';
             }
         }
 
-        // Check for saved theme preference
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            const html = document.documentElement;
-            const themeIcon = document.getElementById('theme-icon');
-            const themeText = document.getElementById('theme-text');
-            
-            html.setAttribute('data-bs-theme', savedTheme);
-            if (savedTheme === 'dark') {
-                themeIcon.classList.replace('bi-sun-fill', 'bi-moon-fill');
-                themeText.textContent = 'Dark Mode';
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-bs-theme');
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+
+        // Authentication Functions
+        function showLoginForm() {
+            const loginForm = document.getElementById('login-form');
+            loginForm.classList.toggle('show');
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password, rememberMe }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    updateAuthUI(true);
+                    document.getElementById('login-form').classList.remove('show');
+                } else {
+                    alert(data.message || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('An error occurred during login');
             }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            updateAuthUI(false);
+        }
+
+        function updateAuthUI(isLoggedIn) {
+            const authButtons = document.getElementById('auth-buttons');
+            const userProfile = document.getElementById('user-profile');
+            const userName = document.getElementById('user-name');
+
+            if (isLoggedIn) {
+                const user = JSON.parse(localStorage.getItem('user'));
+                userName.textContent = `${user.first_name} ${user.last_name}`;
+                authButtons.style.display = 'none';
+                userProfile.classList.add('show');
+            } else {
+                authButtons.style.display = 'block';
+                userProfile.classList.remove('show');
+            }
+        }
+
+        // Check authentication status on page load
+        const token = localStorage.getItem('token');
+        if (token) {
+            updateAuthUI(true);
+        }
+
+        // Tool Search
+        const searchInput = document.querySelector('.search-box input');
+        const toolCards = document.querySelectorAll('.tool-card');
+
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            toolCards.forEach(card => {
+                const title = card.querySelector('h4').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         });
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/main.js"></script>
 </body>
 </html> 
